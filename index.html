@@ -44,6 +44,7 @@
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 html,body{margin:0;min-height:100%}
+body{overflow-x:clip}
 body{
   color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;
   background:
@@ -89,7 +90,9 @@ h2{font-family:var(--display);font-weight:700;font-size:1.02rem;margin:0 0 10px;
 .lring small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
 .rank{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:0 0 6px}
 .brk{display:grid;gap:5px;font-size:.8rem}
-.brk div{display:grid;grid-template-columns:1fr 64px 34px;gap:8px;align-items:center}
+.brk div{display:grid;grid-template-columns:minmax(0,1fr) 64px 34px;gap:8px;align-items:center}
+.brk div span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:440px){.level{gap:12px;padding:14px}.lring{width:100px;height:100px}.lring b{font-size:1.8rem}.lring small{font-size:.66rem}.rank{font-size:1rem}.brk{font-size:.76rem}.brk div{grid-template-columns:minmax(0,1fr) 34px 22px;gap:6px}.stat{padding:9px 10px}.stat b{font-size:.98rem}}
 .mini{height:6px;border-radius:9px;background:var(--surface2);overflow:hidden}
 .mini i{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,var(--cyan),var(--pink))}
 
@@ -280,6 +283,7 @@ function daysBetween(a,b){return Math.round((parseKey(b)-parseKey(a))/864e5);}
 function uid(){return Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function fmt(n,dec){return Number(n).toLocaleString("ru-RU",{maximumFractionDigits:dec==null?0:dec});}
+function fmt1(n){return Number(n).toLocaleString("ru-RU",{minimumFractionDigits:1,maximumFractionDigits:1});}
 function num(v){const n=parseFloat(String(v).replace(",","."));return isFinite(n)?n:NaN;}
 function prettyDay(k){if(k===todayKey())return"Сегодня";if(k===shiftKey(todayKey(),-1))return"Вчера";return parseKey(k).toLocaleDateString("ru-RU",{day:"numeric",month:"long"});}
 function toast(t){const el=document.getElementById("toast");el.textContent=t;el.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove("show"),1900);}
@@ -513,7 +517,7 @@ function viewGora(){
         <circle cx="60" cy="60" r="52" fill="none" stroke="var(--surface2)" stroke-width="10"/>
         <circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="10" pathLength="10" stroke-dasharray=".04 .96"/>
         <circle id="arc" class="arc" cx="60" cy="60" r="52" fill="none" stroke="url(#lg)" stroke-width="10" stroke-linecap="round" pathLength="10" stroke-dasharray="${animateLevel&&!reduced?0:lv.v} 10"/></svg>
-      <div class="c"><div><b id="lvl" data-v="${lv.v}">${animateLevel&&!reduced?"0,0":fmt(lv.v,1)}</b><small>асцент из 10</small></div></div>
+      <div class="c"><div><b id="lvl" data-v="${lv.v}">${animateLevel&&!reduced?"0,0":fmt1(lv.v)}</b><small>асцент из 10</small></div></div>
     </div>
     <div class="grow">
       <p class="rank">${esc(lv.rank)}</p>
@@ -563,7 +567,7 @@ function afterGora(){
   if(animateLevel&&!reduced){
     const arc=document.getElementById("arc"),el=document.getElementById("lvl"),v=+el.dataset.v;
     requestAnimationFrame(()=>requestAnimationFrame(()=>arc.setAttribute("stroke-dasharray",`${v} 10`)));
-    const t0=performance.now();const cnt=now=>{const k=Math.min(1,(now-t0)/1200),e=1-Math.pow(1-k,3);el.textContent=fmt(Math.round(v*e*10)/10,1);if(k<1)requestAnimationFrame(cnt);};requestAnimationFrame(cnt);
+    const t0=performance.now();const cnt=now=>{const k=Math.min(1,(now-t0)/1200),e=1-Math.pow(1-k,3);el.textContent=fmt1(Math.round(v*e*10)/10);if(k<1)requestAnimationFrame(cnt);};requestAnimationFrame(cnt);
   }
   animateLevel=false;
 }
@@ -847,7 +851,7 @@ document.addEventListener("click",e=>{
     case"habit":{const d=day(todayKey()),h=state.habits.find(x=>x.id===b.dataset.id);if(!h)return;
       const before=levelInfo().v;
       if(d.h[h.id]!=null)delete d.h[h.id];else{d.h[h.id]=h.m;sparks(b);toast(`+${h.m} м`);}
-      save();const after=levelInfo().v;if(after>before&&Math.floor(after)>Math.floor(before))setTimeout(()=>toast(`Асцент ${fmt(after,1)}! Новый уровень`),900);
+      save();const after=levelInfo().v;if(after>before&&Math.floor(after)>Math.floor(before))setTimeout(()=>toast(`Асцент ${fmt1(after)}! Новый уровень`),900);
       render();break;}
     case"day":{const k=shiftKey(foodDay,+b.dataset.n);if(k<=todayKey()){foodDay=k;render();}break;}
     case"water":{const d=day(foodDay),i=+b.dataset.i;d.water=d.water===i+1?i:i+1;save();render();break;}
