@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.iliyap356ctrl.voskhozhdenie",
+        "sha256_cert_fingerprints": ["2E:88:95:87:DF:0C:7C:23:B4:C9:E5:BA:B0:81:6A:54:D4:93:1E:81:12:5E:C5:60:5B:CE:38:00:FA:AC:C6:25"]
+      }
+    }]
